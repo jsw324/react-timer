@@ -7,12 +7,12 @@ var Timer = React.createClass({
   getInitialState: function () {
     return {
       count: 0,
-      countdownStatus: 'paused'
+      timerStatus: 'stopped'
     };
   },
   componentDidUpdate: function (prevProps, prevState) {
-    if(this.state.countdownStatus !== prevState.countdownStatus) {
-      switch (this.state.countdownStatus) {
+    if(this.state.timerStatus !== prevState.timerStatus) {
+      switch (this.state.timerStatus) {
         case 'started':
           this.startTimer();
           break;
@@ -25,47 +25,27 @@ var Timer = React.createClass({
       }
     }
   },
+  componentWillUnmount: function () {
+    clearInterval(this.timer);
+  },
   startTimer: function () {
     this.timer = setInterval(() => {
-      var newCount = this.state.count + 1;
       this.setState({
-        count: newCount
+        count: this.state.count + 1
       });
     }, 1000);
   },
-  onCountChange: function (newStatus) {
-    return () => {
-      this.setState({countdownStatus: 'started'})
-    }
-  },
-  handleSetCountdown: function (seconds) {
-    this.setState({
-      count: seconds,
-      countdownStatus: 'started'
-    });
-  },
   handleStatusChange: function (newStatus) {
-    this.setState({countdownStatus: newStatus})
+    this.setState({timerStatus: newStatus})
   },
   render: function () {
-    var {count, countdownStatus} = this.state;
-    var renderControlArea = () => {
-      if (countdownStatus !== 'stopped') {
-        return <Controls countdownStatus={countdownStatus} onStatusChange={this.handleStatusChange}/>;
-      } else {
-        return (
-          <div className="controls">
-            <button className="button primary" onClick={this.onCountChange('started')}>Start</button>
-            <button className="button alert hollow" onClick={this.onCountChange('stopped')}>Clear</button>
-          </div>
-        )
-      }
-    }
+    var {count, timerStatus} = this.state;
+
     return (
       <div>
         <h1 className="page-title">Timer App</h1>
         <Clock totalSeconds={count}/>
-        {renderControlArea()}
+        <Controls countdownStatus={timerStatus} onStatusChange={this.handleStatusChange}/>
       </div>
     )
   }
